@@ -211,6 +211,37 @@
     .btn-cancel:hover { background: #e8e8e0; }
 
     .empty { font-size: 13px; color: #888; text-align: center; padding: 1.5rem 0; }
+
+    /* Bandeau identification testeur */
+#tester-banner {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: #ffffff;
+  border-top: 1px solid #e0e0d8;
+  padding: 1rem 1.5rem;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  z-index: 1000;
+  box-shadow: 0 -4px 16px rgba(0,0,0,0.06);
+}
+#tester-banner p {
+  font-size: 13px;
+  color: #666;
+  flex-shrink: 0;
+}
+#tester-banner input {
+  max-width: 220px;
+  padding: 6px 10px;
+  font-size: 13px;
+}
+#tester-banner .btn-add {
+  padding: 6px 14px;
+  font-size: 13px;
+  flex-shrink: 0;
+}
   </style>
 </head>
 <body>
@@ -338,5 +369,33 @@
   render()
 </script>
 
+<!-- Bandeau identification testeur -->
+<div id="tester-banner" style="display:none;">
+  <p>👋 Pour le suivi du test :</p>
+  <input type="text" id="testerName" placeholder="Ton prénom ou email" />
+  <button class="btn-add" onclick="identifyTester()">OK</button>
+</div>
+
+<script>
+  (function() {
+    // Si déjà identifié, on ne montre pas le bandeau
+    const saved = localStorage.getItem('lumio_tester_id');
+    if (saved) {
+      posthog.identify(saved, { name: saved });
+      return;
+    }
+    // Sinon, afficher le bandeau
+    document.getElementById('tester-banner').style.display = 'flex';
+  })();
+
+  function identifyTester() {
+    const name = document.getElementById('testerName').value.trim();
+    if (!name) return;
+    localStorage.setItem('lumio_tester_id', name);
+    posthog.identify(name, { name: name, role: 'tester' });
+    document.getElementById('tester-banner').style.display = 'none';
+    posthog.capture('tester_identified', { tester_name: name });
+  }
+</script>
 </body>
 </html>
